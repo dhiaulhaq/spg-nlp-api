@@ -26,6 +26,7 @@ class TaskCreateRequest(BaseModel):
     location: str
     admin_id: str
     assigned_spgs: List[str]
+    product_knowledge: Optional[List[str]] = []
 
 class TaskUpdateRequest(BaseModel):
     title: Optional[str] = None
@@ -33,6 +34,7 @@ class TaskUpdateRequest(BaseModel):
     task_date: Optional[str] = None
     location: Optional[str] = None
     assigned_spgs: Optional[List[str]] = None
+    product_knowledge: Optional[List[str]] = None
 
 class RecordingSubmitRequest(BaseModel):
     task_id: str

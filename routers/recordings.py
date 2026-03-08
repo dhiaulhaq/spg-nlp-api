@@ -17,16 +17,30 @@ async def get_all_recordings(current_user: str = Depends(verify_token)):
 @router.post("/")
 async def submit_recording(req: RecordingSubmitRequest, current_user: str = Depends(verify_token)):
     try:
-        evaluator = CustomNLPEvaluator(req.transcript)
+        task_res = supabase.table("tasks").select("product_knowledge").eq("id", req.task_id).execute()
+        
+        if not task_res.data:
+            raise HTTPException(status_code=404, detail="Task tidak ditemukan")
+            
+        pk_data = task_res.data[0].get("product_knowledge", [])
+
+        evaluator = CustomNLPEvaluator(req.transcript, product_knowledge=pk_data)
         total_skor, detail_nlp_json = evaluator.run_evaluation()
+        
         recording_data = {
-            "task_id": req.task_id, "spg_id": req.spg_id, "transcript": req.transcript,
-            "total_score": total_skor, "nlp_detail": detail_nlp_json
+            "task_id": req.task_id,
+            "spg_id": req.spg_id,
+            "transcript": req.transcript,
+            "total_score": total_skor,
+            "nlp_detail": detail_nlp_json
         }
         res = supabase.table("recordings").insert(recording_data).execute()
+        
         return {
             "message": "Recording berhasil dinilai dan disimpan",
-            "total_score": total_skor, "recording_id": res.data[0]['id'], "nlp_detail": detail_nlp_json
+            "total_score": total_skor,
+            "recording_id": res.data[0]['id'],
+            "nlp_detail": detail_nlp_json
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -18,7 +18,8 @@ async def create_task(req: TaskCreateRequest, admin_id: str = Depends(verify_adm
     try:
         task_data = {
             "title": req.title, "description": req.description, "task_date": req.task_date,
-            "location": req.location, "created_by": req.admin_id, "assigned_spgs": req.assigned_spgs
+            "location": req.location, "created_by": req.admin_id, "assigned_spgs": req.assigned_spgs, 
+            "product_knowledge": req.product_knowledge
         }
         res = supabase.table("tasks").insert(task_data).execute()
         return {"message": "Task berhasil dibuat", "data": res.data}
